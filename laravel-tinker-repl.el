@@ -34,7 +34,7 @@
 (require 'f)
 
 (defconst laravel-tinker-repl-version "1.0.0"
-  "fish repl version number.")
+  "laravel tinker repl version number.")
 
 (defgroup laravel-tinker-repl ()
   "laravel tinker repl"
