@@ -132,7 +132,7 @@
 (defun laravel-tinker-repl ()
   (interactive)
   (let* ((buf-name laravel-tinker-repl-process-name)
-         (my-dir (read-directory-name "DIRECTORY: "))
+         (my-dir (locate-dominating-file default-directory ".git"))
          (default-directory my-dir))
     (switch-to-buffer (laravel-tinker-repl--make-process))
     (laravel-tinker-repl-mode)
