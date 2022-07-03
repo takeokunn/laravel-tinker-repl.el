@@ -62,7 +62,7 @@
   :tag "laravel tinker repl execution command"
   :type '())
 
-(defvar laravel-tinker-repl-process-name "laravel-tinker"
+(defvar laravel-tinker-repl-process-name "laravel-tinker-repl"
   "process name of laravel tinker REPL.")
 
 (defcustom laravel-tinker-repl-input-ignoredups t
