@@ -1,11 +1,11 @@
-;;; laravel-tinker-repl.el --- summary -*- lexical-binding: t -*-
+;;; laravel-tinker-repl.el --- run laravel-tinker by comint-mode -*- lexical-binding: t -*-
 
-;; Author: obara take
-;; Maintainer: obara take
-;; Version: version
-;; Homepage:https://github.com/takeokunn/laravel-tinker-repl.el
-;; Keywords: laravel,tinker,comint,repl
-
+;; Author: Takeo Obara <bararararatty@gmail.com>
+;; Maintainer: Takeo Obara
+;; Version: v1.0.0
+;; Package-Requires: ((emacs "29.0") (f "0.20.0") (comint "22.1") (php-mode "1.25.0") (ansi-color "3.4.2"))
+;; Homepage: https://github.com/takeokunn/ob-phpstan
+;; Keywords: larvel, tinker, comint-mode
 
 ;; This file is not part of GNU Emacs
 
@@ -22,13 +22,11 @@
 ;; For a full copy of the GNU General Public License
 ;; see <http://www.gnu.org/licenses/>.
 
-
 ;;; Commentary:
 
-;; commentary
+;; run laravel-tinker by comint-mode
 
 ;;; Code:
-
 
 (require 'f)
 (require 'comint)
@@ -36,10 +34,26 @@
 (require 'ansi-color)
 
 (defconst laravel-tinker-repl-version "1.0.0"
-  "laravel tinker repl version number.")
+  "Version of laravel-tinker-repl.")
+
+(defcustom laravel-tinker-repl-exec-command '("php" "artisan" "tinker")
+  "Command to execute laravel tinker."
+  :group 'laravel-tinker-repl
+  :tag "laravel tinker repl execution command"
+  :type 'list)
+
+(defcustom laravel-tinker-repl-input-ignoredups t
+  "If non-nil, comint does not record duplicated input.  See also `comint-input-ignoredups'."
+  :group 'laravel-tinker-repl
+  :type 'boolean)
+
+(defcustom laravel-tinker-repl-process-echoes t
+  "If non-nil, laravel tinker does not echo any input.  See also `comint-process-echoes'."
+  :group 'laravel-tinker-repl
+  :type 'boolean)
 
 (defgroup laravel-tinker-repl ()
-  "laravel tinker repl"
+  "Run laravel tinker REPL."
   :tag "laravel tinker repl"
   :prefix "laravel-tinker-repl-"
   :group 'laravel-tinker-repl-repl)
@@ -52,38 +66,16 @@
     (define-key php-mode-map (kbd "C-c C-z") 'laravel-tinker-repl-switch-to-repl)
     map))
 
-(defvar laravel-tinker-repl-mode-hook
-  nil
-  "List of functions to be executed on entry to `laravel-tinker-repl-mode'.")
-
-(defcustom laravel-tinker-repl-exec-command '("php" "artisan" "tinker")
-  "Laravel Tinker Repl exec command"
-  :group 'laravel-tinker-repl
-  :tag "laravel tinker repl execution command"
-  :type '())
+(defvar laravel-tinker-repl-mode-hook nil
+  "Hook for `laravel-tinker-repl-mode'.")
 
 (defvar laravel-tinker-repl-process-name "laravel-tinker-repl"
-  "process name of laravel tinker REPL.")
+  "Process name of laravel tinker REPL.")
 
-(defcustom laravel-tinker-repl-input-ignoredups t
-  "If non-nil, don't add input matching the last on the input ring. See also `comint-input-ignoredups'"
-  :group 'laravel-tinker-repl
-  :type 'boolean)
+(defvar laravel-tinker-repl-comint-buffer-process nil
+  "Comint buffer process name of laravel tinker REPL.")
 
-(defcustom laravel-tinker-repl-process-echoes t
-  "If non-nil, laravel tinker does not echo any input. See also `comint-process-echoes'"
-  :group 'laravel-tinker-repl
-  :type 'boolean)
-
-(defvar laravel-tinker-repl-comint-buffer-process
-  nil
-  "A list (buffer-name process) is arguments for `make-comint'.")
 (make-variable-buffer-local 'laravel-tinker-repl-comint-buffer-process)
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;            private method           ;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun laravel-tinker-repl--detect-buffer ()
   "Return tuple list, comint buffer name and program."
@@ -91,6 +83,7 @@
       '("laravel-tinker-repl" "laravel-tinker-repl")))
 
 (defun laravel-tinker-repl--make-process ()
+  "Make laravel tinker process."
   (apply 'make-comint-in-buffer
          (car (laravel-tinker-repl--detect-buffer))
          (cadr (laravel-tinker-repl--detect-buffer))
@@ -99,16 +92,12 @@
          (cdr laravel-tinker-repl-exec-command)))
 
 (defun laravel-tinker-repl--get-or-create-process ()
+  "Get or create process."
   (let ((proc (get-process laravel-tinker-repl-process-name)))
     (unless (processp proc)
       (save-excursion (laravel-tinker-repl))
       (setq proc (get-process laravel-tinker-repl-process-name)))
     proc))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;           public function           ;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 
 (defun laravel-tinker-repl-quit-or-cancel ()
   "Send ^C to laravel tinker repl process."
@@ -117,19 +106,29 @@
 
 ;;;###autoload
 (defun laravel-tinker-repl-send-line ()
+  "Send line to repl."
   (interactive)
   (let ((str (thing-at-point 'line 'no-properties)))
     (comint-send-string (cadr (laravel-tinker-repl--detect-buffer)) str)))
 
 ;;;###autoload
 (defun laravel-tinker-repl-switch-to-repl ()
+  "Switch to repl."
   "If there is a `laravel-tinker-repl-process' running switch to it, otherwise spawn one."
   (interactive)
   (pop-to-buffer
    (process-buffer (laravel-tinker-repl--get-or-create-process))))
 
 ;;;###autoload
+(defun laravel-tinker-repl-run (buf-name process)
+  "Run tinker repl.  Needs BUF-NAME and PROCESS."
+  (interactive)
+  (let ((laravel-tinker-repl-comint-buffer-process (list buf-name process)))
+    (call-interactively 'laravel-tinker-repl)))
+
+;;;###autoload
 (defun laravel-tinker-repl ()
+  "Run laravel tinker repl."
   (interactive)
   (let* ((buf-name laravel-tinker-repl-process-name)
          (my-dir (locate-dominating-file default-directory ".git"))
@@ -138,11 +137,6 @@
     (laravel-tinker-repl-mode)
     (run-hooks 'laravel-tinker-repl-hook)))
 (put 'laravel-tinker-repl 'interactive-only 'laravel-tinker-repl-run)
-
-;;;###autoload
-(defun laravel-tinker-repl-run (buf-name process)
-  (let ((laravel-tinker-repl-comint-buffer-process (list buf-name process)))
-    (call-interactively 'laravel-tinker-repl)))
 
 (define-derived-mode laravel-tinker-repl-mode comint-mode "Laravel tinker REPL"
   "Major-mode for laravel Tiner REPL."
