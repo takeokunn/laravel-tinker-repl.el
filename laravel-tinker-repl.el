@@ -4,7 +4,7 @@
 ;; Maintainer: Takeo Obara
 ;; Version: v1.0.0
 ;; Package-Requires: ((emacs "29.0") (f "0.20.0") (comint "22.1") (php-mode "1.25.0") (ansi-color "3.4.2"))
-;; Homepage: https://github.com/takeokunn/ob-phpstan
+;; Homepage: https://github.com/takeokunn/laravel-tinker-repl.el
 ;; Keywords: larvel, tinker, comint-mode
 
 ;; This file is not part of GNU Emacs
@@ -113,7 +113,6 @@
 
 ;;;###autoload
 (defun laravel-tinker-repl-switch-to-repl ()
-  "Switch to repl."
   "If there is a `laravel-tinker-repl-process' running switch to it, otherwise spawn one."
   (interactive)
   (pop-to-buffer
