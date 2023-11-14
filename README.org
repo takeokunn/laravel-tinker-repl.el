@@ -1,0 +1,20 @@
+#+STARTUP: content
+#+STARTUP: fold
+* laravel-tinker-repl.el
+
+Run Laravel Tinker REPL in Emacs.
+
+** Install
+*** with Melpa
+yet
+*** with Manually
+Add laravel-tinker-repl.el to your load-path and require.
+
+#+begin_src emacs-lisp
+  (add-to-list 'load-path "/path/to/laravel-tinker-repl.el")
+  (require 'laravel-tinker-repl)
+#+end_src
+** Usage
+Type =M-x laravel-tinker-repl= to run.
+** LICENSE
+GPL v3.
