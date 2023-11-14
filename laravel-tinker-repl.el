@@ -108,7 +108,7 @@
 (defun laravel-tinker-repl-send-line ()
   "Send line to repl."
   (interactive)
-  (let ((str (string-trim (thing-at-point 'line 'no-properties))))
+  (let ((str (string-trim-left (thing-at-point 'line 'no-properties))))
     (comint-send-string (cadr (laravel-tinker-repl--detect-buffer)) str)))
 
 ;;;###autoload
